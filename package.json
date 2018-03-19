@@ -1,0 +1,20 @@
+{
+  "name": "content",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "virtual": "bash -c 'source .virtual/bin/activate'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RECDAO/content.git"
+  },
+  "author": "Carl Larson <cslarson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RECDAO/content/issues"
+  },
+  "homepage": "https://github.com/RECDAO/content#readme"
+}
