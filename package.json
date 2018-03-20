@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "virtual": "bash -c 'source .virtual/bin/activate'"
+    "virtual": "bash -c 'source .virtual/bin/activate'",
+    "serve": "node server.js",
+    "build": "webpack --config webpack.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +18,35 @@
   "bugs": {
     "url": "https://github.com/RECDAO/content/issues"
   },
-  "homepage": "https://github.com/RECDAO/content#readme"
+  "homepage": "https://github.com/RECDAO/content#readme",
+  "dependencies": {
+    "babylon": "^6.18.0",
+    "bluebird": "^3.5.1",
+    "chokidar": "^2.0.2",
+    "hapi": "^17.2.3",
+    "inert": "^5.1.0",
+    "moment": "^2.21.0",
+    "nes": "^8.0.0",
+    "vue": "^2.5.16",
+    "vuetify": "^1.0.9",
+    "vuex": "^3.0.1",
+    "vuex-router-sync": "^5.0.0",
+    "web3": "^1.0.0-beta.33"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.42",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.42",
+    "@babel/preset-env": "^7.0.0-beta.42",
+    "babel-loader": "^8.0.0-beta.2",
+    "copy-webpack-plugin": "^4.5.1",
+    "css-loader": "^0.28.11",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "html-webpack-plugin": "^3.0.7",
+    "offline-plugin": "^4.9.0",
+    "vue-loader": "^14.2.1",
+    "vue-router": "^3.0.1",
+    "vue-template-compiler": "^2.5.16",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.12"
+  }
 }

@@ -59,5 +59,6 @@ typings/
 
 .virtual/
 praw.ini
-posts/*
 __pycache__/
+.temp-backup/
+static
