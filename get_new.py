@@ -7,8 +7,8 @@ utils.restore(posts)
 
 reddit = praw.Reddit(store_json_result=True)
 
-# subreddit = reddit.subreddit("ethtrader+ethereum")
-subreddit = reddit.subreddit("ethtrader_test")
+subreddit = reddit.subreddit("ethtrader+ethereum")
+# subreddit = reddit.subreddit("ethtrader_test")
 
 def start():
     for post in subreddit.stream.submissions():

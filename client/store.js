@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import Web3 from 'web3';
+import moment from "moment";
 import RECDAOArtifacts from 'artifacts/RECDAO.json';
 import RegistryArtifacts from 'artifacts/Registry.json';
 import TokenArtifacts from 'artifacts/Token.json';
 import ContentDAOArtifacts from 'artifacts/ContentDAO.json';
 import { NETWORKS } from 'constants.json';
+const dateFormat = "YYYY-MM-DD";
 // import RegistryArtifacts from 'artifacts/Registry.json';
 // import TokenArtifacts from 'artifacts/Token.json';
 
@@ -16,12 +18,16 @@ const state = {
   balance: null,
   blockNum: null,
   count: 0,
+  dates: [],
+  selectedDates: [],
   decimals: null,
   network: null,
   username: null,
   contracts: {},
   web3: null,
-  posts: {}
+  posts: {},
+  subs: [],
+  selectedSubs: []
 }
 
 const mutations = {
@@ -30,6 +36,18 @@ const mutations = {
   },
   ADD_POST (state, post) {
     Vue.set(state.posts, post.id, post);
+  },
+  ADD_DATE (state, date) {
+    if(!state.dates.includes(date)) {
+      state.dates.push(date);
+      state.selectedDates.push(date);
+    }
+  },
+  ADD_SUB (state, sub) {
+    if(!state.subs.includes(sub)) {
+      state.subs.push(sub);
+      state.selectedSubs.push(sub);
+    }
   },
   SET_ACCOUNT (state, account) {
     state.account = account;
@@ -49,6 +67,12 @@ const mutations = {
   SET_NETWORK (state, network) {
     state.network = network;
   },
+  SET_SELECTED_DATES (state, dates) {
+    state.selectedDates = dates;
+  },
+  SET_SELECTED_SUBS (state, subs) {
+    state.selectedSubs = subs;
+  },
   SET_SUPPLY (state, supply) {
     state.supply = supply;
   },
@@ -64,12 +88,12 @@ const actions = {
   setAccount ({commit, dispatch, state}, account) {
     console.log("setAccount", account);
     commit("SET_ACCOUNT", account);
-    // if(!!account) return dispatch("setUsername");
+    if(!!account) return dispatch("setUsername");
   },
-  // setBalance ({ commit, state }) {
-  //   let {Token} = state.contracts;
-  //   return Token.methods.balanceOf(state.account).call().then(res=>commit("SET_BALANCE", res/Math.pow(10, state.decimals)));
-  // },
+  setBalance ({ commit, state }) {
+    let {Token} = state.contracts;
+    return Token.methods.balanceOf(state.account).call().then(res=>commit("SET_BALANCE", res/Math.pow(10, state.decimals)));
+  },
   setContracts ({commit, dispatch, state}) {
     let contracts = [/*ContentDAOArtifacts, */TokenArtifacts, RegistryArtifacts].reduce((prev, artifacts)=>{
       prev[artifacts.contractName] = new web3.eth.Contract(artifacts.abi, artifacts.networks["4"].address);
@@ -77,13 +101,13 @@ const actions = {
     }, {});
     commit("SET_CONTRACTS", contracts);
   },
-  // setUsername ({ commit, dispatch, state }) {
-  //   let {Registry} = state.contracts;
-  //   return Registry.methods.ownerToUsername(state.account).call()
-  //     .then(web3.utils.hexToUtf8)
-  //     .then(username=>commit("SET_USERNAME", username))
-  //     .then(()=>dispatch("setBalance"));
-  // },
+  setUsername ({ commit, dispatch, state }) {
+    let {Registry} = state.contracts;
+    return Registry.methods.ownerToUsername(state.account).call()
+      .then(web3.utils.hexToUtf8)
+      .then(username=>commit("SET_USERNAME", username))
+      .then(()=>dispatch("setBalance"));
+  },
   setWeb3 ({ commit, state }) {
     return new Promise((resolve, reject)=>{
       if (typeof web3 !== 'undefined') {
@@ -127,13 +151,22 @@ const actions = {
         }
       });
   },
-  async addArchive({ commit, state }, date){
-    let res = await fetch(`posts/archive/${date}.json`);
+  async addDate ({ commit, dispatch, state }, date) {
+    let res = await dispatch("addArchive", date);
+    if(res.ok) commit("ADD_DATE", date);
+  },
+  addPost ({ commit, state }, post) {
+    post.created_utc = moment(post.created_utc*1000)
+    commit("ADD_POST", post);
+    if(!state.subs.includes(post.subreddit)) commit("ADD_SUB", post.subreddit);
+  },
+  async addArchive({ commit, dispatch, state }, date){
+    let res = await fetch(`posts/archive/${date.format(dateFormat)}.json`);
     if(res.ok) {
       let data = await res.json();
-      console.log(data)
-      for (let id in data) commit("ADD_POST", data[id]);
+      for (let id in data) dispatch("addPost", data[id]);
     }
+    return res;
   }
 }
 

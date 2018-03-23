@@ -3,6 +3,7 @@ process.env.NODE_ENV = 'development'
 
 const path = require('path')
 const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   entry: {
@@ -42,9 +43,15 @@ module.exports = {
           }
         }
       },
-      { test: /\.css$/, use: 'css-loader' },
+      { test: /\.css$/, use: [ 'style-loader', 'css-loader' ] },
     ]
-  }
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: cwd('client/index.html')
+    })
+  ],
+  watch: true
 }
 
 function cwd(file) {

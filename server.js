@@ -21,11 +21,11 @@ const start = async () => {
   await server.register(Inert);
   await server.register(Nes);
 
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: (request, h) => "<div id='app'></div><script src='app.js'></script>"
-  });
+  // server.route({
+  //   method: 'GET',
+  //   path: '/',
+  //   handler: (request, h) => "<div id='app'></div><script src='app.js'></script>"
+  // });
 
   server.route({
       method: 'GET',
