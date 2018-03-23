@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Web3 from 'web3';
 import moment from "moment";
+import bases from 'bases';
 import RECDAOArtifacts from 'artifacts/RECDAO.json';
 import RegistryArtifacts from 'artifacts/Registry.json';
 import TokenArtifacts from 'artifacts/Token.json';
@@ -27,15 +28,13 @@ const state = {
   web3: null,
   posts: {},
   subs: [],
-  selectedSubs: []
+  selectedSubs: [],
+  transactions: []
 }
 
 const mutations = {
   INCREMENT (state, account) {
     state.count++;
-  },
-  ADD_POST (state, post) {
-    Vue.set(state.posts, post.id, post);
   },
   ADD_DATE (state, date) {
     if(!state.dates.includes(date)) {
@@ -67,6 +66,9 @@ const mutations = {
   SET_NETWORK (state, network) {
     state.network = network;
   },
+  SET_POST (state, post) {
+    Vue.set(state.posts, post.id, post);
+  },
   SET_SELECTED_DATES (state, dates) {
     state.selectedDates = dates;
   },
@@ -75,6 +77,9 @@ const mutations = {
   },
   SET_SUPPLY (state, supply) {
     state.supply = supply;
+  },
+  SET_TRANSACTIONS (state, transactions) {
+    state.transactions = transactions;
   },
   SET_USERNAME (state, username) {
     state.username = username;
@@ -95,7 +100,7 @@ const actions = {
     return Token.methods.balanceOf(state.account).call().then(res=>commit("SET_BALANCE", res/Math.pow(10, state.decimals)));
   },
   setContracts ({commit, dispatch, state}) {
-    let contracts = [/*ContentDAOArtifacts, */TokenArtifacts, RegistryArtifacts].reduce((prev, artifacts)=>{
+    let contracts = [ContentDAOArtifacts, TokenArtifacts, RegistryArtifacts].reduce((prev, artifacts)=>{
       prev[artifacts.contractName] = new web3.eth.Contract(artifacts.abi, artifacts.networks["4"].address);
       return prev;
     }, {});
@@ -155,10 +160,21 @@ const actions = {
     let res = await dispatch("addArchive", date);
     if(res.ok) commit("ADD_DATE", date);
   },
-  addPost ({ commit, state }, post) {
+  async addPost ({ commit, dispatch, state }, post) {
     post.created_utc = moment(post.created_utc*1000)
-    commit("ADD_POST", post);
+    commit("SET_POST", post);
     if(!state.subs.includes(post.subreddit)) commit("ADD_SUB", post.subreddit);
+    let sync = await dispatch("syncPost", post);
+  },
+  async syncPost ({ commit, state }, post) {
+    let {ContentDAO} = state.contracts;
+    let idB10 = bases.fromBase36(post.id);
+    let p = await ContentDAO.methods.posts(idB10).call();
+    let stage = parseInt(p.stage);
+    if(stage) {
+      post.stage = stage;
+      commit("SET_POST", post);
+    }
   },
   async addArchive({ commit, dispatch, state }, date){
     let res = await fetch(`posts/archive/${date.format(dateFormat)}.json`);
@@ -167,7 +183,24 @@ const actions = {
       for (let id in data) dispatch("addPost", data[id]);
     }
     return res;
-  }
+  },
+  async addTransaction ({ commit, dispatch, state }, tx) {
+    let transactions = state.transactions;
+    let idx = transactions.push(tx) - 1;
+    commit("SET_TRANSACTIONS", transactions);
+    try {
+      let res = tx.promise();
+      if(res.status && typeof tx.success === "function") tx.success();
+      return dispatch("updateTransaction", {idx, result});
+    } catch (err) {
+      return dispatch("updateTransaction", {idx, error: err});
+    }
+  },
+  updateTransaction ({ commit, state }, {idx, result, error}) {
+    let transactions = state.transactions;
+    Vue.set(transactions, idx, { result, label: transactions[idx].label, error});
+    commit("SET_TRANSACTIONS", transactions);
+  },
 }
 
 const store = new Vuex.Store({

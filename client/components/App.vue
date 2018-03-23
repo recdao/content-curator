@@ -3,26 +3,28 @@
 
     <v-navigation-drawer fixed clipped class="grey lighten-4" app v-model="drawer">
       <v-card>
-        <v-card-title>Dates</v-card-title>
-        <v-divider></v-divider>
-        <v-list dense>
-          <v-list-tile v-for="date in dates">
-            <v-list-tile-content>
-              <v-checkbox :label="date.format(dateFormat)" :value="date" v-model="selectedDates"></v-checkbox>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-        <v-btn fab small outline bottom right absolute @click.native.stop="dateDialog = !dateDialog">
-          <v-icon>add</v-icon>
-        </v-btn>
-      </v-card>
-      <v-card>
         <v-card-title>Subs</v-card-title>
         <v-divider></v-divider>
         <v-list dense>
           <v-list-tile v-for="sub in subs">
             <v-list-tile-content>
-              <v-checkbox :label="sub" :value="sub" v-model="selectedSubs"></v-checkbox>
+              <v-checkbox :label="sub" :value="sub" v-model="selectedSubs" v-bind:key="sub"></v-checkbox>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-card>
+      <v-card>
+        <v-card-title style="padding-bottom: 8px">
+          <span style="flex-grow: 1">Dates</span>
+          <v-btn outline fab small @click.native.stop="dateDialog = !dateDialog" style="margin: 0">
+            <v-icon>add</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-divider></v-divider>
+        <v-list dense>
+          <v-list-tile v-for="date in dates">
+            <v-list-tile-content>
+              <v-checkbox :label="date.format(dateFormat)" :value="date" v-model="selectedDates" v-bind:key="date.format(dateFormat)"></v-checkbox>
             </v-list-tile-content>
           </v-list-tile>
         </v-list>
@@ -40,7 +42,7 @@
 
     <v-footer app fixed>
       <v-layout row justify-space-between class="px-2">
-        <div xs2>{{`Account: ${account.slice(0,8)}...`}}</div>
+        <div xs2>{{`Account: ${account && account.slice(0,8)}...`}}</div>
         <div xs2>{{`Account REC: ${balance}`}}</div>
         <div xs2>{{`Total REC: ${supply}`}}</div>
         <div xs2>{{`network: ${network}`}}</div>

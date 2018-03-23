@@ -34,6 +34,17 @@ function setDefaultAccount(){
 }
 
 function poll(){
+  let current = store.state.blockNum;
   web3.eth.getBlockNumber()
-    .then(num=>store.commit("SET_BLOCK_NUM", num));
+    .then(num=>{
+      if(num !== current) onNewBlock();
+      store.commit("SET_BLOCK_NUM", num);
+    });
+}
+
+function onNewBlock(){
+  let posts = store.state.posts;
+  for (let id in posts) {
+    store.dispatch("syncPost", posts[id]);
+  }
 }
