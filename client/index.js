@@ -11,6 +11,7 @@ const start = async () => {
   await store.dispatch("setDecimals");
   await store.dispatch("setSupply");
   await setDefaultAccount();
+  await store.dispatch("setAllowance");
   await store.dispatch("setBalance");
   await store.dispatch("addDate", moment())
   await store.dispatch("addDate", moment().subtract(1, "days"))

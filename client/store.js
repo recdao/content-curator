@@ -16,6 +16,7 @@ Vue.use(Vuex)
 
 const state = {
   account: null,
+  allowance: 0,
   balance: null,
   blockNum: null,
   count: 0,
@@ -50,6 +51,9 @@ const mutations = {
   },
   SET_ACCOUNT (state, account) {
     state.account = account;
+  },
+  SET_ALLOWANCE (state, allowance) {
+    state.allowance = allowance;
   },
   SET_BLOCK_NUM (state, blockNum) {
     state.blockNum = blockNum;
@@ -94,6 +98,10 @@ const actions = {
     console.log("setAccount", account);
     commit("SET_ACCOUNT", account);
     if(!!account) return dispatch("setUsername");
+  },
+  setAllowance ({commit, dispatch, state}) {
+    let {Token, ContentDAO} = state.contracts;
+    return Token.methods.allowance(state.account, ContentDAO._address).call().then(res=>commit("SET_ALLOWANCE", res/Math.pow(10, state.decimals)));
   },
   setBalance ({ commit, state }) {
     let {Token} = state.contracts;
@@ -160,20 +168,21 @@ const actions = {
     let res = await dispatch("addArchive", date);
     if(res.ok) commit("ADD_DATE", date);
   },
-  async addPost ({ commit, dispatch, state }, post) {
+  addPost ({ commit, dispatch, state }, post) {
     post.created_utc = moment(post.created_utc*1000)
     commit("SET_POST", post);
     if(!state.subs.includes(post.subreddit)) commit("ADD_SUB", post.subreddit);
-    let sync = await dispatch("syncPost", post);
+    dispatch("syncPost", post.id);
   },
-  async syncPost ({ commit, state }, post) {
+  async syncPost ({ commit, state }, id) {
     let {ContentDAO} = state.contracts;
-    let idB10 = bases.fromBase36(post.id);
+    let idB10 = bases.fromBase36(id);
     let p = await ContentDAO.methods.posts(idB10).call();
     let stage = parseInt(p.stage);
     if(stage) {
-      post.stage = stage;
+      let post = Object.assign({stage}, state.posts[id]);
       commit("SET_POST", post);
+      console.log(post)
     }
   },
   async addArchive({ commit, dispatch, state }, date){
@@ -185,15 +194,17 @@ const actions = {
     return res;
   },
   async addTransaction ({ commit, dispatch, state }, tx) {
+    console.log(tx)
     let transactions = state.transactions;
     let idx = transactions.push(tx) - 1;
     commit("SET_TRANSACTIONS", transactions);
     try {
-      let res = tx.promise();
-      if(res.status && typeof tx.success === "function") tx.success();
+      let result = tx.promise();
+      if(result.status && typeof tx.success === "function") tx.success();
       return dispatch("updateTransaction", {idx, result});
-    } catch (err) {
-      return dispatch("updateTransaction", {idx, error: err});
+    } catch (error) {
+      console.log(error)
+      return dispatch("updateTransaction", {idx, error});
     }
   },
   updateTransaction ({ commit, state }, {idx, result, error}) {
