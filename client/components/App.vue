@@ -39,11 +39,12 @@
     </v-content>
 
     <v-footer app fixed>
-      <v-layout row justify-space-between>
-        <span xs2>&copy; 2018</span>
-        <div xs2>{{'Total REC: '+ supply}}</div>
-        <div xs2>{{'network: '+ network}}</div>
-        <div xs2>{{'block: '+ blockNum}}</div>
+      <v-layout row justify-space-between class="px-2">
+        <div xs2>{{`Account: ${account.slice(0,8)}...`}}</div>
+        <div xs2>{{`Account REC: ${balance}`}}</div>
+        <div xs2>{{`Total REC: ${supply}`}}</div>
+        <div xs2>{{`network: ${network}`}}</div>
+        <div xs2>{{`block: ${blockNum}`}}</div>
       </v-layout>
     </v-footer>
 
@@ -72,6 +73,8 @@ export default {
     }
   },
   computed: {
+    account(){ return this.$store.state.account },
+    balance(){ return this.$store.state.balance },
     blockNum(){ return this.$store.state.blockNum },
     dates(){ return this.$store.state.dates },
     selectedDates: {
