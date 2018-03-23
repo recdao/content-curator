@@ -9,13 +9,13 @@
           <v-list-tile-content class="align-end">{{date}}</v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar v-if="!post.stage">
-          <v-list-tile-content>
-            <v-select color="green" :items="[50,100,200,400,800,1600,3200]" v-model="stake" label="Start" single-line></v-select>
+          <v-list-tile-content style="align-items: center;">
+            <v-select color="green" :items="[50,100,200,400,800,1600,3200]" v-model="stake" label="min 50 to start" single-line></v-select>
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar v-else-if="post.stage === 1">
-          <v-list-tile-content>
-            <v-select color="red" :items="[50,100,200,400,800,1600,3200]" v-model="stake" label="Reject" single-line></v-select>
+          <v-list-tile-content style="align-items: center;">
+            <v-select color="red" :items="[50,100,200,400,800,1600,3200]" v-model="stake" label="needs x to reject" single-line></v-select>
           </v-list-tile-content>
           <v-list-tile-content>
             <v-text-field label="stake" type="number" v-model="stake" required></v-text-field>
