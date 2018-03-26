@@ -56,6 +56,11 @@
       <router-view></router-view>
     </v-content>
 
+    <v-layout column style="position: fixed; bottom: 32px; width: 100%; z-index: 100;">
+      <v-alert dismissible type="warning" :value="!account" style="width: 100%">no account found. do you need to unlock metamask?</v-alert>
+      <tx-notify :label="label" :result="result" :error="error" v-for="({label,result,error}, idx) in transactions" v-bind:key="idx"></tx-notify>
+    </v-layout>
+
     <v-footer app fixed>
       <v-layout row justify-space-between class="px-2">
         <div xs2>{{`Account: ${account && account.slice(0,8)}...`}}</div>
@@ -76,11 +81,14 @@
 </template>
 
 <script>
+import TxNotify from './TxNotify'
 import moment from 'moment';
 import { mapState } from 'vuex'
 
 export default {
-  components: {},
+  components: {
+    TxNotify
+  },
   data: function (){
     return {
       dateFormat: "YYYY-MM-DD",

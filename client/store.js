@@ -82,6 +82,9 @@ const mutations = {
   SET_SUPPLY (state, supply) {
     state.supply = supply;
   },
+  ADD_TX (state, tx) {
+    state.transactions.push(tx);
+  },
   SET_TRANSACTIONS (state, transactions) {
     state.transactions = transactions;
   },
@@ -150,17 +153,23 @@ const actions = {
       .then(id=>{
         switch (id) {
           case 1:
-            return commit("SET_NETWORK", NETWORKS.MAIN);
+            commit("SET_NETWORK", NETWORKS.MAIN);
+            return NETWORKS.MAIN;
           case 2:
-            return commit("SET_NETWORK", NETWORKS.MORDEN);
+            commit("SET_NETWORK", NETWORKS.MORDEN);
+            return NETWORKS.MORDEN;
           case 3:
-            return commit("SET_NETWORK", NETWORKS.ROPSTEN);
+            commit("SET_NETWORK", NETWORKS.ROPSTEN);
+            return NETWORKS.ROPSTEN;
           case 4:
-            return commit("SET_NETWORK", NETWORKS.RINKEBY);
+            commit("SET_NETWORK", NETWORKS.RINKEBY);
+            return NETWORKS.RINKEBY;
           case 42:
-            return commit("SET_NETWORK", NETWORKS.KOVAN);
+            commit("SET_NETWORK", NETWORKS.KOVAN);
+            return NETWORKS.KOVAN;
           default:
-            return commit("SET_NETWORK", NETWORKS.OTHER);
+            commit("SET_NETWORK", NETWORKS.OTHER);
+            return NETWORKS.OTHER;
         }
       });
   },
@@ -177,12 +186,23 @@ const actions = {
   async syncPost ({ commit, state }, id) {
     let {ContentDAO} = state.contracts;
     let idB10 = bases.fromBase36(id);
-    let p = await ContentDAO.methods.posts(idB10).call();
+    let p = await ContentDAO.methods.getPost(idB10).call();
     let stage = parseInt(p.stage);
     if(stage) {
-      let post = Object.assign({stage}, state.posts[id]);
+      let post = Object.assign({
+        stage,
+        ended: p.ended,
+        feePaid: p.feePaid,
+        liked: p.liked,
+        stakeDown: parseInt(p.stakeDown),
+        stakeUp: parseInt(p.stakeUp),
+        startedAt: parseInt(p.startedAt),
+        totalDown: parseInt(p.totalDown),
+        totalUp: parseInt(p.totalUp),
+        track: parseInt(p.track),
+        voted: p.voted,
+      }, state.posts[id]);
       commit("SET_POST", post);
-      console.log(post)
     }
   },
   async addArchive({ commit, dispatch, state }, date){
@@ -194,23 +214,21 @@ const actions = {
     return res;
   },
   async addTransaction ({ commit, dispatch, state }, tx) {
-    console.log(tx)
-    let transactions = state.transactions;
-    let idx = transactions.push(tx) - 1;
-    commit("SET_TRANSACTIONS", transactions);
+    commit("ADD_TX", tx);
+    let idx = state.transactions.indexOf(tx);
     try {
-      let result = tx.promise();
-      if(result.status && typeof tx.success === "function") tx.success();
-      return dispatch("updateTransaction", {idx, result});
+      let result = await tx.promise();
+      dispatch("updateTransaction", {idx, result});
+      return !!web3.utils.hexToNumber(result.status) && typeof tx.success === "function" ? tx.success() : Promise.resolve();
     } catch (error) {
-      console.log(error)
-      return dispatch("updateTransaction", {idx, error});
+      dispatch("updateTransaction", {idx, error});
+      return Promise.reject(error);
     }
   },
   updateTransaction ({ commit, state }, {idx, result, error}) {
-    let transactions = state.transactions;
-    Vue.set(transactions, idx, { result, label: transactions[idx].label, error});
-    commit("SET_TRANSACTIONS", transactions);
+    let tx = state.transactions[idx];
+    if(result) tx.result = result;
+    if(error) tx.error = error;
   },
 }
 

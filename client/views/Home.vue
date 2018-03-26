@@ -6,20 +6,15 @@
     <div v-else-if="!['rinkeby', 'other'].includes(network)">
       please switch to the rinkeby network.
     </div>
-    <div v-else-if="!account">
-      no account found. do you need to unlock metamask?
-    </div>
-    <div v-else>
-      <v-container fluid fill-height class="grey lighten-4" grid-list-xl>
-        <v-layout row wrap justify-center>
-          <post
-            v-for="post in posts"
-            v-bind:key="post.id"
-            :post="post"
-          ></post>
-        </v-layout>
-      </v-container>
-    </div>
+    <v-container v-else fluid fill-height class="grey lighten-4" grid-list-xl>
+      <v-layout row wrap justify-center>
+        <post
+          v-for="post in posts"
+          v-bind:key="post.id"
+          :post="post"
+        ></post>
+      </v-layout>
+    </v-container>
   </section>
 </template>
 

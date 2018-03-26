@@ -8,20 +8,15 @@
           <v-list-tile-content><a target="_blank" :href="`https://www.reddit.com/${post.permalink}`">{{post.subreddit}} comments</a></v-list-tile-content>
           <v-list-tile-content class="align-end">{{date}}</v-list-tile-content>
         </v-list-tile>
-        <v-list-tile avatar v-if="!post.stage">
+        <v-list-tile avatar>
+          <v-list-tile-content class="">
+            <v-btn :disabled="!!post.stage && !post.liked" outline color="green" @click="doStake(true)">Support</v-btn>
+          </v-list-tile-content>
           <v-list-tile-content>
-            <v-select solo color="green" :items="[50, 100, 150, 300, 600, 1200, 1600, 2400]" v-model="stake" label="Stake" single-line></v-select>
+            <v-select solo :items="[50, 100, 150, 300, 600, 1200, 1600, 2400]" v-model="stake" label="Stake" single-line></v-select>
           </v-list-tile-content>
           <v-list-tile-content class="align-end">
-            <v-btn outline color="green" @click="doOpen">Open</v-btn>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile avatar v-else-if="post.stage === 1">
-          <v-list-tile-content style="align-items: center;">
-            <v-select solo color="red" :items="[50, 100, 150, 300, 600, 1200, 1600, 2400]" v-model="stake" label="Stake" single-line></v-select>
-          </v-list-tile-content>
-          <v-list-tile-content class="align-end">
-            <v-btn dark color="red" @click="doStake(false)">Reject</v-btn>
+            <v-btn :disabled="post.liked" outline color="red" @click="doStake(false)">Reject</v-btn>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -59,19 +54,12 @@ export default {
     ContentDAO(){ return this.$store.state.contracts.ContentDAO; }
   },
   methods: {
-    doOpen(){
-      this.$store.dispatch("addTransaction", {
-        label: `Open ${this.post.id}`,
-        promise: ()=>this.ContentDAO.methods.open(bases.fromBase36(this.post.id), this.stake*Math.pow(10, this.decimals)).send({from: this.account, gas: 400000}),
-        success: ()=>this.$store.dispatch("syncPost", id),
-        args: [bases.fromBase36(this.post.id), this.stake*Math.pow(10, this.decimals)]
-      });
-    },
     doStake(vote){
+      console.log(bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals))
       this.$store.dispatch("addTransaction", {
         label: `Stake ${this.post.id}`,
-        promise: ()=>this.ContentDAO.methods.stake(bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals)).send({from: this.account, gas: 200000}),
-        success: ()=>this.$store.dispatch("syncPost", id)
+        promise: ()=>this.ContentDAO.methods.stake(bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals)).send({from: this.account, gas: 250000}),
+        success: ()=>this.$store.dispatch("syncPost", this.post.id)
       });
     },
     test(){
