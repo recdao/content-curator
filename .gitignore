@@ -61,4 +61,4 @@ typings/
 praw.ini
 __pycache__/
 .temp-backup/
-static
+# static
