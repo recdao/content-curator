@@ -11,7 +11,7 @@
       <v-divider></v-divider>
       <v-list dense>
         <v-list-tile>
-          <v-list-tile-content><a target="_blank" :href="`https://www.reddit.com/${post.permalink}`">{{post.subreddit}} comments</a></v-list-tile-content>
+          <v-list-tile-content><a target="_blank" :href="`https://www.reddit.com${post.permalink}`">{{post.subreddit}} comments</a></v-list-tile-content>
           <v-list-tile-content class="align-end">{{date}}</v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar v-if="post.ended">

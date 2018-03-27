@@ -29,6 +29,7 @@ const state = {
   selectedDates: [],
   selectedSubs: [],
   subs: [],
+  supply: null,
   transactions: [],
   username: null,
   web3: null
@@ -157,9 +158,12 @@ const actions = {
     let {Token} = state.contracts;
     return Token.methods.balanceOf(state.account).call().then(res=>commit("SET_BALANCE", res/Math.pow(10, state.decimals)));
   },
-  setSupply ({ commit, state }) {
+  async setSupply ({ commit, state }) {
     let {Token} = state.contracts;
-    return Token.methods.totalSupply().call().then(res=>commit("SET_SUPPLY", res/Math.pow(10, state.decimals)));
+    let supply = await Token.methods.totalSupply().call()
+    // .then(res=>commit("SET_SUPPLY", res/Math.pow(10, state.decimals)));
+    console.log(supply)
+    commit("SET_SUPPLY", supply/Math.pow(10, state.decimals))
   },
   setNetwork ({ commit, state }) {
     return window.web3.eth.net.getId()
