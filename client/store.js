@@ -19,18 +19,19 @@ const state = {
   allowance: 0,
   balance: null,
   blockNum: null,
+  contracts: {},
   count: 0,
   dates: [],
-  selectedDates: [],
   decimals: null,
+  isMember: null,
   network: null,
-  username: null,
-  contracts: {},
-  web3: null,
   posts: {},
-  subs: [],
+  selectedDates: [],
   selectedSubs: [],
-  transactions: []
+  subs: [],
+  transactions: [],
+  username: null,
+  web3: null
 }
 
 const mutations = {
@@ -66,6 +67,9 @@ const mutations = {
   },
   SET_DECIMALS (state, decimals) {
     state.decimals = decimals;
+  },
+  SET_IS_MEMBER (state, isMember) {
+    state.isMember = isMember;
   },
   SET_NETWORK (state, network) {
     state.network = network;
@@ -123,6 +127,15 @@ const actions = {
       .then(web3.utils.hexToUtf8)
       .then(username=>commit("SET_USERNAME", username))
       .then(()=>dispatch("setBalance"));
+  },
+  setKarma ({ commit, state }) {
+    let {Registry} = state.contracts;
+    return Registry.methods.getKarma(state.username).call().then(res=>commit("SET_KARMA", res));
+  },
+  async setIsMember ({ commit, state }) {
+    let {ContentDAO} = state.contracts;
+    let isMember = await ContentDAO.methods.isMember(state.account).call();
+    commit("SET_IS_MEMBER", isMember);
   },
   setWeb3 ({ commit, state }) {
     return new Promise((resolve, reject)=>{
@@ -186,7 +199,7 @@ const actions = {
   async syncPost ({ commit, state }, id) {
     let {ContentDAO} = state.contracts;
     let idB10 = bases.fromBase36(id);
-    let p = await ContentDAO.methods.getPost(idB10).call();
+    let p = await ContentDAO.methods.getPost(idB10).call({from: state.account});
     let stage = parseInt(p.stage);
     if(stage) {
       let post = Object.assign({
@@ -194,11 +207,15 @@ const actions = {
         ended: p.ended,
         feePaid: p.feePaid,
         liked: p.liked,
-        stakeDown: parseInt(p.stakeDown),
-        stakeUp: parseInt(p.stakeUp),
+        stake: {
+          false: parseInt(p.stakeDown),
+          true: parseInt(p.stakeUp)
+        },
+        total: {
+          false: parseInt(p.totalDown),
+          true: parseInt(p.totalUp)
+        },
         startedAt: parseInt(p.startedAt),
-        totalDown: parseInt(p.totalDown),
-        totalUp: parseInt(p.totalUp),
         track: parseInt(p.track),
         voted: p.voted,
       }, state.posts[id]);

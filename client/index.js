@@ -18,6 +18,7 @@ const start = async () => {
   if(defaultAccount){
     await store.dispatch("setAllowance");
     await store.dispatch("setBalance");
+    await store.dispatch("setIsMember");
   }
   await store.dispatch("addDate", moment())
   await store.dispatch("addDate", moment().subtract(1, "days"))
