@@ -68,22 +68,40 @@ export default {
   },
   computed: {
     account(){ return this.$store.state.account; },
+    allowance(){ return this.$store.state.allowance; },
+    balance(){ return this.$store.state.balance; },
     blockNum(){ return this.$store.state.blockNum; },
     decimals(){ return this.$store.state.decimals; },
     isMember(){ return this.$store.state.isMember; },
     network(){ return this.$store.state.network; },
     stake: {
-      get(){ return this.userStake || this.post.hasOwnProperty("liked") ? (2*this.post.total[this.post.liked] - this.post.total[!this.post.liked])/Math.pow(10, this.decimals) : 50},
+      get(){
+        return this.userStake || (
+          this.post.hasOwnProperty("liked") ?
+          (2*this.post.total[this.post.liked] - this.post.total[!this.post.liked])/Math.pow(10, this.decimals) :
+          50
+        );
+      },
       set(val){ this.userStake = val; }
     },
     ContentDAO(){ return this.$store.state.contracts.ContentDAO; }
   },
   methods: {
     doStake(vote){
-      console.log(bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals))
+      let stake = this.userStake;
+      // console.log(bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals))
+      // console.log(stake, this.allowance, this.balance);
+      if(stake > this.balance) {
+        alert(`You cannot stake an amount (${stake}) greater than your RECT balance (${this.balance}).`);
+        return;
+      }
+      if(stake > this.allowance) {
+        alert(`Please increase your allowance to at least ${stake}.`);
+        return;
+      }
       this.$store.dispatch("addTransaction", {
         label: `Stake ${this.post.id}`,
-        promise: ()=>this.ContentDAO.methods.stake(bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals)).send({from: this.account, gas: 250000}),
+        promise: ()=>this.ContentDAO.methods.stake(bases.fromBase36(this.post.id), vote, stake*Math.pow(10, this.decimals)).send({from: this.account, gas: 250000}),
         success: ()=>this.$store.dispatch("syncPost", this.post.id)
       });
     },
