@@ -88,20 +88,19 @@ export default {
   },
   methods: {
     doStake(vote){
-      let stake = this.userStake;
-      // console.log(bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals))
-      // console.log(stake, this.allowance, this.balance);
-      if(stake > this.balance) {
+      if(this.stake > this.balance) {
         alert(`You cannot stake an amount (${stake}) greater than your RECT balance (${this.balance}).`);
         return;
       }
-      if(stake > this.allowance) {
+      if(this.stake > this.allowance) {
         alert(`Please increase your allowance to at least ${stake}.`);
         return;
       }
+      let args = [bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals)]
+      console.log(args)
       this.$store.dispatch("addTransaction", {
         label: `Stake ${this.post.id}`,
-        promise: ()=>this.ContentDAO.methods.stake(bases.fromBase36(this.post.id), vote, stake*Math.pow(10, this.decimals)).send({from: this.account, gas: 250000}),
+        promise: ()=>this.ContentDAO.methods.stake(...args).send({from: this.account, gas: 250000}),
         success: ()=>this.$store.dispatch("syncPost", this.post.id)
       });
     },
