@@ -92,11 +92,11 @@ export default {
   methods: {
     doStake(vote){
       if(this.stake > this.balance) {
-        alert(`You cannot stake an amount (${stake}) greater than your RECT balance (${this.balance}).`);
+        alert(`You cannot stake an amount (${this.stake}) greater than your REC balance (${this.balance}).`);
         return;
       }
       if(this.stake > this.allowance) {
-        alert(`Please increase your allowance to at least ${stake}.`);
+        alert(`Please increase your allowance to at least ${this.stake}.`);
         return;
       }
       let args = [bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals)]
