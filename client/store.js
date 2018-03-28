@@ -3,11 +3,12 @@ import Vuex from 'vuex'
 import Web3 from 'web3';
 import moment from "moment";
 import bases from 'bases';
+import decamelize from 'decamelize';
 import RECDAOArtifacts from 'artifacts/RECDAO.json';
 import RegistryArtifacts from 'artifacts/Registry.json';
 import TokenArtifacts from 'artifacts/Token.json';
 import ContentDAOArtifacts from 'artifacts/ContentDAO.json';
-import { NETWORKS } from 'constants.json';
+import { NETWORKS, FILTERS as FILTER_OPTIONS } from 'constants.json';
 const dateFormat = "YYYY-MM-DD";
 // import RegistryArtifacts from 'artifacts/Registry.json';
 // import TokenArtifacts from 'artifacts/Token.json';
@@ -20,10 +21,11 @@ const state = {
   balance: null,
   blockNum: null,
   contracts: {},
-  count: 0,
   dates: [],
   decimals: null,
   isMember: null,
+  watching: [],
+  filters: Object.values(FILTER_OPTIONS),
   network: null,
   posts: {},
   selectedDates: [],
@@ -32,13 +34,11 @@ const state = {
   supply: null,
   transactions: [],
   username: null,
+  watching: {},
   web3: null
 }
 
 const mutations = {
-  INCREMENT (state, account) {
-    state.count++;
-  },
   ADD_DATE (state, date) {
     if(!state.dates.includes(date)) {
       state.dates.push(date);
@@ -51,53 +51,29 @@ const mutations = {
       state.selectedSubs.push(sub);
     }
   },
-  SET_ACCOUNT (state, account) {
-    state.account = account;
-  },
-  SET_ALLOWANCE (state, allowance) {
-    state.allowance = allowance;
-  },
-  SET_BLOCK_NUM (state, blockNum) {
-    state.blockNum = blockNum;
-  },
-  SET_BALANCE (state, balance) {
-    state.balance = balance;
-  },
-  SET_CONTRACTS (state, contracts) {
-    state.contracts = contracts;
-  },
-  SET_DECIMALS (state, decimals) {
-    state.decimals = decimals;
-  },
-  SET_IS_MEMBER (state, isMember) {
-    state.isMember = isMember;
-  },
-  SET_NETWORK (state, network) {
-    state.network = network;
-  },
   SET_POST (state, post) {
     Vue.set(state.posts, post.id, post);
   },
-  SET_SELECTED_DATES (state, dates) {
-    state.selectedDates = dates;
-  },
-  SET_SELECTED_SUBS (state, subs) {
-    state.selectedSubs = subs;
-  },
-  SET_SUPPLY (state, supply) {
-    state.supply = supply;
+  SET_WATCH_POST (state, {postStub, watch}) {
+    if(!watch) Vue.delete(state.watching, postStub.id);
+    else Vue.set(state.watching, postStub.id, postStub);
   },
   ADD_TX (state, tx) {
     state.transactions.push(tx);
-  },
-  SET_TRANSACTIONS (state, transactions) {
-    state.transactions = transactions;
-  },
-  SET_USERNAME (state, username) {
-    state.username = username;
-  },
-  SET_WEB3 (state, web3) {
-    state.web3 = web3;
+  }
+}
+
+for (var key in state) {
+  let defaultSetMutation = `SET_${decamelize(key).toUpperCase()}`;
+  if(!(defaultSetMutation in mutations)) {
+    mutations[defaultSetMutation] = createDefaultSetMutator(key);
+    // console.log(defaultSetMutation, mutations[defaultSetMutation])
+  }
+}
+
+function createDefaultSetMutator(key){
+  return function(state, val){
+    state[key] = val;
   }
 }
 
@@ -251,6 +227,22 @@ const actions = {
     if(result) tx.result = result;
     if(error) tx.error = error;
   },
+  watch({ commit, state }, post) {
+    let postStub = {id: post.id, date: post.created_utc.format(dateFormat)};
+    commit("SET_WATCH_POST", {postStub, watch: true});
+    localStorage.setItem("watching", JSON.stringify(state.watching));
+  },
+  // unwatch({ commit, state }, post) {
+  //   let postStub = {id: post.id, date: post.created_utc.format(dateFormat)};
+  //   commit("SET_WATCH_POST", {postStub, watch: false});
+  //   localStorage.setItem("watching", JSON.stringify(state.watching));
+  // },
+  toggleWatch({ commit, state }, post) {
+    let watching = state.watching.hasOwnProperty(post.id);
+    let postStub = {id: post.id, date: post.created_utc.format(dateFormat)};
+    commit("SET_WATCH_POST", {postStub, watch: !watching});
+    localStorage.setItem("watching", JSON.stringify(state.watching));
+  }
 }
 
 const store = new Vuex.Store({

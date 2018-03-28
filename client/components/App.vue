@@ -3,6 +3,17 @@
 
     <v-navigation-drawer fixed clipped class="grey lighten-4" app v-model="drawer">
       <v-card>
+        <v-card-title>Filters</v-card-title>
+        <v-divider></v-divider>
+        <v-list dense>
+          <v-list-tile v-for="filter in Object.values(FILTER_OPTIONS)">
+            <v-list-tile-content>
+              <v-checkbox :label="filter" :value="filter" v-model="filters"></v-checkbox>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-card>
+      <v-card>
         <v-card-title>Subs</v-card-title>
         <v-divider></v-divider>
         <v-list dense>
@@ -84,6 +95,7 @@
 import TxNotify from './TxNotify'
 import moment from 'moment';
 import { mapState } from 'vuex'
+import { FILTERS as FILTER_OPTIONS } from 'constants.json';
 
 export default {
   components: {
@@ -96,7 +108,8 @@ export default {
       drawer: null,
       picker: null,
       newAllowance: null,
-      today: moment()
+      today: moment(),
+      FILTER_OPTIONS
     }
   },
   computed: {
@@ -109,6 +122,10 @@ export default {
     blockNum(){ return this.$store.state.blockNum },
     dates(){ return this.$store.state.dates },
     decimals(){ return this.$store.state.decimals; },
+    filters: {
+      get(){ return this.$store.state.filters },
+      set(value){ this.$store.commit('SET_FILTERS', value) }
+    },
     selectedDates: {
       get(){ return this.$store.state.selectedDates },
       set(value){ this.$store.commit('SET_SELECTED_DATES', value) }

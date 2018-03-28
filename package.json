@@ -24,6 +24,7 @@
     "bases": "^0.2.1",
     "bluebird": "^3.5.1",
     "chokidar": "^2.0.2",
+    "decamelize": "^2.0.0",
     "hapi": "^17.2.3",
     "inert": "^5.1.0",
     "moment": "^2.21.0",

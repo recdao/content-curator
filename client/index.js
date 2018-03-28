@@ -12,6 +12,12 @@ const start = async () => {
   let network = await store.dispatch("setNetwork");
   if(![NETWORKS.RINKEBY, NETWORKS.OTHER].includes(network)) return;
   await store.dispatch("setContracts");
+  let watching = {};
+  try {
+    let stored = JSON.parse(localStorage.getItem("watching"));
+    if(stored) watching = stored;
+  } catch(e){console.log("could not retrieve existing watch items.", e)}
+  await store.commit("SET_WATCHING", watching);
   await store.dispatch("setDecimals");
   await store.dispatch("setSupply");
   let defaultAccount = await setDefaultAccount();

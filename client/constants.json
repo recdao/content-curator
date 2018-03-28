@@ -7,6 +7,14 @@
     "KOVAN": "kovan",
     "OTHER": "other"
   },
+  "FILTERS" : {
+    "WATCHING": "watching",
+    "REJECTED": "rejected",
+    "SUPPORTED": "supported",
+    "NOT_STARTED": "not started",
+    "IN_ARBITRATION": "in arbitration",
+    "ENDED": "ended"
+  },
   "DAO_ACTIONS" : [
     {"id":0, "enum": "UPGRADE", "label": "Upgrade DAO", "dataLabel": "New address"},
     {"id":1, "enum": "ADD_ROOT", "label": "Update registrations", "dataLabel": "New Merkle root"}

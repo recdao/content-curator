@@ -1,12 +1,14 @@
 <template>
   <v-flex xs12 sm12 md6 lg4 xl3>
     <v-card>
-      <v-card-title>
-        <h4>
-          <v-icon :color="post.liked === true ? 'green' : post.liked === false ? 'red' : ''" style="font-size: inherit; margin-right: 4px;">
+      <v-card-title style="padding-right: 44px; min-height: 74px;">
+        <h4><a target="_blank" :href="post.url">{{post.title}}</a></h4>
+        <div class="post-status-icons" style="display: flex; flex-direction: column; position: absolute; right: 0; top: 0;">
+          <v-btn class="align-end" :color="watching.hasOwnProperty(post.id) ? 'amber' : ''" small flat icon @click="toggleWatch"><v-icon small>visibility</v-icon></v-btn>
+          <v-icon small :color="post.liked === true ? 'green' : post.liked === false ? 'red' : ''">
             {{post.liked === true ? 'thumb_up' : post.liked === false ? 'thumb_down' : 'thumbs_up_down'}}
           </v-icon>
-          <a target="_blank" :href="post.url">{{post.title}}</a></h4>
+        </div>
       </v-card-title>
       <v-divider></v-divider>
       <v-list dense>
@@ -71,6 +73,7 @@ export default {
     allowance(){ return this.$store.state.allowance; },
     balance(){ return this.$store.state.balance; },
     blockNum(){ return this.$store.state.blockNum; },
+    ContentDAO(){ return this.$store.state.contracts.ContentDAO; },
     decimals(){ return this.$store.state.decimals; },
     isMember(){ return this.$store.state.isMember; },
     network(){ return this.$store.state.network; },
@@ -84,7 +87,7 @@ export default {
       },
       set(val){ this.userStake = val; }
     },
-    ContentDAO(){ return this.$store.state.contracts.ContentDAO; }
+    watching(){ return this.$store.state.watching; }
   },
   methods: {
     doStake(vote){
@@ -98,6 +101,7 @@ export default {
       }
       let args = [bases.fromBase36(this.post.id), vote, this.stake*Math.pow(10, this.decimals)]
       console.log(args)
+      this.$store.dispatch("watch", this.post);
       this.$store.dispatch("addTransaction", {
         label: `Stake ${this.post.id}`,
         promise: ()=>this.ContentDAO.methods.stake(...args).send({from: this.account, gas: 250000}),
@@ -105,7 +109,14 @@ export default {
       });
     },
     doWithdraw(){
-      console.log(bases.fromBase36(this.post.id))
+      this.$store.dispatch("addTransaction", {
+        label: `Withdraw ${this.post.id}`,
+        promise: ()=>this.ContentDAO.methods.withdraw(bases.fromBase36(this.post.id)).send({from: this.account, gas: 200000}),
+        success: ()=>this.$store.dispatch("syncPost", this.post.id)
+      });
+    },
+    toggleWatch(){
+      this.$store.dispatch("toggleWatch", this.post);
     }
   }
 }
