@@ -3,7 +3,7 @@ import Nes from "nes";
 import moment from "moment";
 import { NETWORKS } from 'constants.json';
 import { store, app } from './app'
-const client = new Nes.Client("ws://localhost:3000");
+const client = new Nes.Client(`ws://${location.hostname}:${location.port}`);
 
 const start = async () => {
   app.$mount('#app');
