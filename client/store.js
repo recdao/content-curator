@@ -188,12 +188,12 @@ const actions = {
         feePaid: p.feePaid,
         liked: p.liked,
         stake: {
-          false: parseInt(p.stakeDown),
-          true: parseInt(p.stakeUp)
+          false: parseInt(p.stakeDown)/Math.pow(10, state.decimals),
+          true: parseInt(p.stakeUp)/Math.pow(10, state.decimals)
         },
         total: {
-          false: parseInt(p.totalDown),
-          true: parseInt(p.totalUp)
+          false: parseInt(p.totalDown)/Math.pow(10, state.decimals),
+          true: parseInt(p.totalUp)/Math.pow(10, state.decimals)
         },
         startedAt: parseInt(p.startedAt),
         track: parseInt(p.track),

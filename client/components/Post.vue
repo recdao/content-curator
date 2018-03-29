@@ -18,7 +18,7 @@
         </v-list-tile>
         <v-list-tile avatar v-if="post.ended">
           <v-list-tile-content class="align-center">
-            <v-btn v-if="post.stake[post.liked] > 0" color="green" dark @click="doWithdraw">Withdraw {{post.stake[post.liked]/Math.pow(10, decimals)}}</v-btn>
+            <v-btn v-if="post.stake[post.liked] > 0" color="green" dark @click="doWithdraw">Withdraw {{ ( post.total[!post.liked]*post.stake[post.liked]/post.total[post.liked] ) + post.stake[post.liked] }}</v-btn>
             <span v-else>Staking has ended</span>
           </v-list-tile-content>
         </v-list-tile>
@@ -38,6 +38,11 @@
           <v-list-tile-content>
             <v-btn :disabled="!!post.liked" flat icon color="green" @click="doStake(true)"><v-icon>thumb_up</v-icon></v-btn>
           </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile avatar v-if="!!post.stage" class="user-stake">
+          <v-list-tile-content class="align-end"><div style="text-align: center; width: 52px">{{ post.stake[false] }}</div></v-list-tile-content>
+          <v-list-tile-content class="align-center" style="max-width: 100px;">You</v-list-tile-content>
+          <v-list-tile-content><div style="text-align: center; width: 52px">{{ post.stake[true] }}</div></v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar v-if="post.stage === 2 && isMember && !post.voted">
           <v-list-tile-content class="align-end">
@@ -81,9 +86,8 @@ export default {
       get(){
         return this.userStake || (
           this.post.hasOwnProperty("liked") ?
-          (2*this.post.total[this.post.liked] - this.post.total[!this.post.liked])/Math.pow(10, this.decimals) :
-          50
-        );
+          2*this.post.total[this.post.liked] - this.post.total[!this.post.liked] :
+          50);
       },
       set(val){ this.userStake = val; }
     },
@@ -129,5 +133,9 @@ export default {
   .stake.list__tile__content .input-group--text-field input {
     text-align: center;
     margin-right: -14px;
+  }
+  .list--dense .user-stake .list__tile--avatar {
+    height: 1rem;
+    margin-bottom: 24px;
   }
 </style>
