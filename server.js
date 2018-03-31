@@ -54,6 +54,7 @@ async function sendPost(file, retry) {
   try {
     console.log(`added: ${file}`);
     contents = await fs.readFileAsync(file);
+    console.log(contents);
     server.broadcast( JSON.parse(contents) );
     await fs.unlinkAsync(file);
     console.log(`removed: ${file}`);
