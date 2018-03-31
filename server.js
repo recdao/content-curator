@@ -50,13 +50,15 @@ const start = async () => {
 start();
 
 async function sendPost(file, retry) {
+  let contents;
   try {
     console.log(`added: ${file}`);
-    let contents = await fs.readFileAsync(file);
+    contents = await fs.readFileAsync(file);
     server.broadcast( JSON.parse(contents) );
     await fs.unlinkAsync(file);
     console.log(`removed: ${file}`);
   } catch(err) {
+    console.log(contents)
     if(!retry) {
       await Promise.delay(200);
       return await sendPost(file, true);
