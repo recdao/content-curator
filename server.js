@@ -61,7 +61,7 @@ async function sendPost(file, retry) {
   } catch(err) {
     console.log(contents)
     if(!retry) {
-      await Promise.delay(1000);
+      await Promise.delay(2000);
       return await sendPost(file, true);
     }
     console.warn(err); // TypeError: failed to fetch
