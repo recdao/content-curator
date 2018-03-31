@@ -49,7 +49,7 @@ const start = async () => {
 
 start();
 
-async function sendPost(file) {
+async function sendPost(file, retry) {
   try {
     console.log(`added: ${file}`);
     let contents = await fs.readFileAsync(file);
@@ -57,6 +57,10 @@ async function sendPost(file) {
     await fs.unlinkAsync(file);
     console.log(`removed: ${file}`);
   } catch(err) {
+    if(!retry) {
+      await Promise.delay(200);
+      return await sendPost(file, true);
+    }
     console.warn(err); // TypeError: failed to fetch
   }
 }
