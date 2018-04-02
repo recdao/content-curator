@@ -10,7 +10,7 @@
     "build": "webpack --config webpack.js",
     "bot-start": "forever start bot/index.js && forever logs -f bot/index.js",
     "bot-stop": "forever stop bot/index.js",
-    "bot-log": "forever logs bot/index.js"
+    "bot-log": "forever logs -f bot/index.js"
   },
   "repository": {
     "type": "git",
