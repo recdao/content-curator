@@ -67,7 +67,10 @@ async function sendReply(postId, eventId, replyId){
     id = comment.id;
   } catch (err) {
     if(err.message.indexOf("TOO_OLD") !== -1) id = "TOO_OLD";
-    else console.warn(err);
+    else if(err.message.indexOf("Forbidden")) {
+      id = "403";
+      console.warn(`403 post:${postId}`)
+    } else console.warn(err);
   }
   return await db.none("UPDATE flips SET reply_id = $1 WHERE event_id = $2", [id, eventId]);
 }
