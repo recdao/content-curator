@@ -52,13 +52,15 @@ start();
 async function sendPost(file, retry) {
   retry = retry || 0;
   console.log(`added: ${file}`);
+  let contents;
   try {
-    let contents = await fs.readFileAsync(file);
+    contents = await fs.readFileAsync(file);
   } catch(err){
     return console.warn("read file error", err);
   }
+  let json;
   try {
-    let json = JSON.parse(contents);
+    json = JSON.parse(contents);
   } catch(err){
     return console.warn("json parse error", err);
   }
