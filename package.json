@@ -8,9 +8,9 @@
     "virtual": "source .virtual/bin/activate",
     "serve": "node server.js",
     "build": "webpack --config webpack.js",
-    "bot-start": "forever start index.js && forever logs -f index.js",
-    "bot-stop": "forever stop index.js",
-    "bot-log": "forever logs index.js"
+    "bot-start": "forever start bot/index.js && forever logs -f bot/index.js",
+    "bot-stop": "forever stop bot/index.js",
+    "bot-log": "forever logs bot/index.js"
   },
   "repository": {
     "type": "git",
