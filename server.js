@@ -49,7 +49,7 @@ const start = async () => {
 
 start();
 
-async function sendPost(file, retry) {
+async function sendPost(file, stats, retry) {
   retry = retry || 0;
   console.log(`added: ${file}`, retry);
   let contents;
@@ -64,7 +64,7 @@ async function sendPost(file, retry) {
   } catch(err){
     if(retry < 5){
       await Promise.delay(2000);
-      return await sendPost(file, ++retry);
+      return await sendPost(file, stats, ++retry);
     }
     return console.warn("json parse error", err);
   }
