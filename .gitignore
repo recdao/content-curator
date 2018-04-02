@@ -62,3 +62,4 @@ praw.ini
 __pycache__/
 .temp-backup/
 static/posts/
+.secret.json

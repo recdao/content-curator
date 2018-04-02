@@ -11,7 +11,7 @@ const start = async () => {
   if(!hasWeb3) return;
   let network = await store.dispatch("setNetwork");
   if(![NETWORKS.RINKEBY, NETWORKS.OTHER].includes(network)) return;
-  await store.dispatch("setContracts");
+  store.dispatch("setContracts");
   let watching = {};
   try {
     let stored = JSON.parse(localStorage.getItem("watching"));
