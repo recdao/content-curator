@@ -51,7 +51,7 @@ start();
 
 async function sendPost(file, retry) {
   retry = retry || 0;
-  console.log(`added: ${file}`);
+  console.log(`added: ${file}`, retry);
   let contents;
   try {
     contents = await fs.readFileAsync(file);
@@ -62,6 +62,10 @@ async function sendPost(file, retry) {
   try {
     json = JSON.parse(contents);
   } catch(err){
+    if(retry < 5){
+      await Promise.delay(2000);
+      return await sendPost(file, ++retry);
+    }
     return console.warn("json parse error", err);
   }
   server.broadcast( json );
