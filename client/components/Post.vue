@@ -82,12 +82,13 @@ export default {
     decimals(){ return this.$store.state.decimals; },
     isMember(){ return this.$store.state.isMember; },
     network(){ return this.$store.state.network; },
+    sigStake(){ return this.$store.state.sigStake; },
     stake: {
       get(){
         return this.userStake || (
           this.post.hasOwnProperty("liked") ?
           2*this.post.total[this.post.liked] - this.post.total[!this.post.liked] :
-          50);
+          this.sigStake);
       },
       set(val){ this.userStake = val; }
     },

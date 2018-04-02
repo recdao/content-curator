@@ -30,6 +30,7 @@ const state = {
   posts: {},
   selectedDates: [],
   selectedSubs: [],
+  sigStake: null,
   subs: [],
   supply: null,
   transactions: [],
@@ -98,16 +99,20 @@ const actions = {
     }, {});
     commit("SET_CONTRACTS", contracts);
   },
+  setKarma ({ commit, state }) {
+    let {Registry} = state.contracts;
+    return Registry.methods.getKarma(state.username).call().then(res=>commit("SET_KARMA", res));
+  },
+  setSigStake ({ commit, state }) {
+    let {ContentDAO} = state.contracts;
+    return ContentDAO.methods.SIG_STAKE().call().then(res=>commit("SET_SIG_STAKE", res));
+  },
   setUsername ({ commit, dispatch, state }) {
     let {Registry} = state.contracts;
     return Registry.methods.ownerToUsername(state.account).call()
       .then(web3.utils.hexToUtf8)
       .then(username=>commit("SET_USERNAME", username))
       .then(()=>dispatch("setBalance"));
-  },
-  setKarma ({ commit, state }) {
-    let {Registry} = state.contracts;
-    return Registry.methods.getKarma(state.username).call().then(res=>commit("SET_KARMA", res));
   },
   async setIsMember ({ commit, state }) {
     let {ContentDAO} = state.contracts;

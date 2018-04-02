@@ -17,7 +17,8 @@ const start = async () => {
     let stored = JSON.parse(localStorage.getItem("watching"));
     if(stored) watching = stored;
   } catch(e){console.log("could not retrieve existing watch items.", e)}
-  await store.commit("SET_WATCHING", watching);
+  store.commit("SET_WATCHING", watching);
+  await store.dispatch("setSigStake");
   await store.dispatch("setDecimals");
   await store.dispatch("setSupply");
   let defaultAccount = await setDefaultAccount();
