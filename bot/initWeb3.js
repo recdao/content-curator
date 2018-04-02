@@ -1,7 +1,7 @@
 const Promise = require("bluebird");
 const processFlip = require("./processFlip");
 const writeFileAsync = Promise.promisify(require("fs").writeFile);
-const providerUrl = require('./config').providerUrl;
+const providerUrl = require('../config').providerUrl;
 const Web3 = require("web3");
 const ContentDAOArtifacts = require("../contracts/build/contracts/ContentDAO.json");
 
@@ -10,13 +10,20 @@ exports.reset = function(){
   // new Web3("http://127.0.0.1:9545/");
   let web3 = new Web3(providerUrl);
   this.contracts.ContentDAO = new web3.eth.Contract(ContentDAOArtifacts.abi, ContentDAOArtifacts.networks["4"].address);
-  subscribeTips(this.contracts.ContentDAO);
+  subscribeFlips(this.contracts.ContentDAO);
+  subscribeOpens(this.contracts.ContentDAO);
   subscribeBlocks(web3);
   return global.web3 = web3;
 }
 
-function subscribeTips(ContentDAO){
-  ContentDAO.events.Tip()
+function subscribeFlips(ContentDAO){
+  ContentDAO.events.Flip()
+    .on("data", processFlip)
+    .on("error", console.warn);
+}
+
+function subscribeOpens(ContentDAO){
+  ContentDAO.events.Open()
     .on("data", processFlip)
     .on("error", console.warn);
 }

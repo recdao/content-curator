@@ -63,3 +63,4 @@ __pycache__/
 .temp-backup/
 static/posts/
 .secret.json
+bot/.lastBlock.json

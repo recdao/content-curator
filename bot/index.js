@@ -11,7 +11,15 @@ try { lastBlock = require("./.lastBlock") } catch(err) {}
 if(lastBlock) catchUp(lastBlock - 1);
 
 async function catchUp(fromBlock){
-  console.log(`process Tip events from block: ${fromBlock}`);
-  let tips = await ContentDAO.getPastEvents("Flip", {fromBlock});
-  await Promise.each(tips, processFlip);
+  console.log(`catchUp Flip events from block: ${fromBlock}`);
+
+  let flips = await ContentDAO.getPastEvents("Flip", {fromBlock});
+  await Promise.each(flips, processFlip);
+
+  console.log(`catchUp Open events from block: ${fromBlock}`);
+
+  let opens = await ContentDAO.getPastEvents("Open", {fromBlock});
+  await Promise.each(opens, processFlip);
+
+  console.log("end catchUp")
 }

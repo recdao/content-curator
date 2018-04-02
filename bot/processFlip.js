@@ -3,31 +3,32 @@ const pgp = require("pg-promise")({promiseLib: Promise});
 const bases = require("bases");
 const snoowrap = require('snoowrap');
 const Web3 = require("web3");
-const secret = require("./.secret");
+const secret = require("../.secret");
 const db = pgp(`postgres://postgres:${secret.db.password}@localhost:5432/reddit`);
-const {CONTENT_TYPES} = require("./constants");
-const providerUrl = require('./config').providerUrl;
-const utils = require("./utils");
-const erc20 = require("./erc20");
+const providerUrl = require('../config').providerUrl;
 const r = new snoowrap(secret.reddit);
 const initWeb3 = require("./initWeb3");
 
-module.exports = async function processFlip(tip){
-  let {returnValues}= tip;
-  let eventId = tip.id;
-  // console.log(tip);
-  let {ctype, id, token, amount} = returnValues;
-  ctype = CONTENT_TYPES[parseInt(ctype)];
-  let redditId = bases.toBase36(parseInt(id));
+module.exports = async function processFlip(flip){
+  let {returnValues}= flip;
+  let eventId = flip.id;
+  let {id} = returnValues;
+  let postId = bases.toBase36(parseInt(id));
 
-  let res = await db.any("SELECT * FROM tips WHERE event_id = $1", [eventId]);
-  if(!res.length) {
-    let tx = await getTx(tip.transactionHash);
-    await db.none("INSERT INTO tips(event_id, content_type, reddit_id, token, amount, from_address) VALUES($1, $2, $3, $4, $5, $6)", [eventId, ctype, redditId, token, amount, tx.from]);
-    res = await db.any("SELECT * FROM tips WHERE event_id = $1", [eventId]);
+  let flips = await db.any("SELECT * FROM flips WHERE reddit_id = $1", [postId]);
+  let known = flips.find(f=>f.reddit_id===postId);
+  // let res = await db.any("SELECT * FROM flips WHERE event_id = $1", [eventId]);
+  if(!known) {
+    let tx = await getTx(flip.transactionHash);
+    await db.none("INSERT INTO flips(event_id, reddit_id) VALUES($1, $2)", [eventId, postId]);
+  } else if (known.reply_id){
+    // already processed this flip
+    return;
   }
-  let replyId = res[0].reply_id;
-  if(!replyId) return await sendReply(res[0]);
+  let replied = flips.find(f=>f.reply_id);
+  let replyId;
+  if(replied) replyId = replied.reply_id;
+  return await sendReply(postId, eventId, replyId);
 }
 
 async function getTx(hash, retry){
@@ -42,31 +43,37 @@ async function getTx(hash, retry){
   }
 }
 
-async function sendReply(tip){
+async function sendReply(postId, eventId, replyId){
+  const ContentDAO = initWeb3.contracts.ContentDAO;
+  let post = await ContentDAO.methods.getPost(bases.fromBase36(postId)).call();
   // do send
-  // console.log(tip.reddit_id)
+  // console.log(postId, eventId, replyId)
+  // let reply = await genReply(postId);
+  // console.log(reply);
   // return;
-  let id;
+
+  let id, comment;
   try {
-    let reply = await genReply(tip);
-    let comment;
-    if(tip.content_type === "POST") comment = await r.getSubmission(tip.reddit_id).reply(reply);
-    else comment = await r.getComment(tip.reddit_id).reply(reply);
+    let reply = await genReply(post);
+    let rPost = await r.getSubmission(postId)[post.liked ? "approve" : "remove"]();
+
+    if(replyId) {
+      comment = await r.getComment(replyId).edit(reply);
+      console.log(`edited reply ${comment.id} to POST:${postId}`);
+    } else {
+      comment = await rPost.reply(reply);
+      console.log(`sent reply ${comment.id} to POST:${postId}`);
+    }
     id = comment.id;
-    console.log(`sent reply ${id} to ${tip.content_type}:${tip.reddit_id}`);
   } catch (err) {
     if(err.message.indexOf("TOO_OLD") !== -1) id = "TOO_OLD";
     else console.warn(err);
   }
-  return await db.none("UPDATE tips SET reply_id = $1 WHERE id = $2", [id, tip.id]);
+  return await db.none("UPDATE flips SET reply_id = $1 WHERE event_id = $2", [id, eventId]);
 }
 
-async function genReply(tip){
-  if(utils.isEthTip(tip.token)) return `You received a ${web3.utils.fromWei(tip.amount, "finney")} finney (mETH) tip from ${tip.from_address} directly to your r/recdao registered wallet.`;
-  else {
-    const Token = new web3.eth.Contract(erc20, tip.token);
-    let decimals = await Token.methods.decimals().call();
-    let symbol = await Token.methods.symbol().call();
-    return `You received a ${tip.amount/Math.pow(10, decimals)} ${symbol} tip from ${tip.from_address} directly to your r/recdao registered wallet.`;
-  }
+async function genReply(post){
+  let total = {true: post.totalUp, false: post.totalDown};
+  let toFlip = 2*total[post.liked] - total[!post.liked];
+  return `This post has been ${post.liked ? "approved" : "removed"} by the r/recdao [content curator](http://curator.recdao.org:3000). Stake ${toFlip/Math.pow(10,9)} REC to ${post.liked ? "remove" : "approve"} it.`;
 }
