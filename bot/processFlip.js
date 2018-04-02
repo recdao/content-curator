@@ -16,7 +16,7 @@ module.exports = async function processFlip(flip){
   let postId = bases.toBase36(parseInt(id));
 
   let flips = await db.any("SELECT * FROM flips WHERE reddit_id = $1", [postId]);
-  let known = flips.find(f=>f.reddit_id===postId);
+  let known = flips.find(f=>f.event_id===eventId);
   // let res = await db.any("SELECT * FROM flips WHERE event_id = $1", [eventId]);
   if(!known) {
     let tx = await getTx(flip.transactionHash);
