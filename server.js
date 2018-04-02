@@ -51,20 +51,38 @@ start();
 
 async function sendPost(file, retry) {
   retry = retry || 0;
-  let contents;
+  console.log(`added: ${file}`);
   try {
-    console.log(`added: ${file}`);
-    contents = await fs.readFileAsync(file);
-    console.log(contents);
-    server.broadcast( JSON.parse(contents) );
-    await fs.unlinkAsync(file);
-    console.log(`removed: ${file}`);
-  } catch(err) {
-    console.log(contents)
-    if(retry < 5) {
-      await Promise.delay(2000);
-      return await sendPost(file, ++retry);
-    }
-    console.warn(err); // TypeError: failed to fetch
+    let contents = await fs.readFileAsync(file);
+  } catch(err){
+    return console.warn("read file error", err);
   }
+  try {
+    let json = JSON.parse(contents);
+  } catch(err){
+    return console.warn("json parse error", err);
+  }
+  server.broadcast( json );
+  try {
+    await fs.unlinkAsync(file);
+  } catch(err){
+    return console.warn("unlink file error", err);
+  }
+  console.log(`removed: ${file}`);
+
+
+  // try {
+  //   contents
+  //   console.log(contents);
+  //   server.broadcast( JSON.parse(contents) );
+  //   await fs.unlinkAsync(file);
+  //   console.log(`removed: ${file}`);
+  // } catch(err) {
+  //   console.log(contents)
+  //   if(retry < 5) {
+  //     await Promise.delay(2000);
+  //     return await sendPost(file, ++retry);
+  //   }
+  //   console.warn(err); // TypeError: failed to fetch
+  // }
 }
