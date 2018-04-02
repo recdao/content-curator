@@ -50,6 +50,7 @@ const start = async () => {
 start();
 
 async function sendPost(file, retry) {
+  retry = retry || 0;
   let contents;
   try {
     console.log(`added: ${file}`);
@@ -60,9 +61,9 @@ async function sendPost(file, retry) {
     console.log(`removed: ${file}`);
   } catch(err) {
     console.log(contents)
-    if(!retry) {
+    if(retry < 5) {
       await Promise.delay(2000);
-      return await sendPost(file, true);
+      return await sendPost(file, ++retry);
     }
     console.warn(err); // TypeError: failed to fetch
   }
