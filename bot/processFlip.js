@@ -22,7 +22,7 @@ async function doRemovals(){
 
 async function removePost(flip){
   const ContentDAO = initWeb3.contracts.ContentDAO;
-  let post = await ContentDAO.methods.getPost(bases.fromBase36(postId)).call();
+  let post = await ContentDAO.methods.getPost(bases.fromBase36(flip.reddit_id)).call();
   // double check current state
   if(!post.liked) {
     let subreddit = await r.getSubmission("88yb6x").subreddit.display_name;
