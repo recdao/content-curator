@@ -25,8 +25,11 @@ async function removePost(flip){
   let post = await ContentDAO.methods.getPost(bases.fromBase36(flip.reddit_id)).call();
   // double check current state
   if(!post.liked) {
-    let subreddit = await r.getSubmission("88yb6x").subreddit.display_name;
-    if(canRemoveFrom.includes(subreddit)) await r.getSubmission("88yb6x").remove();
+    let subreddit = await r.getSubmission(flip.reddit_id).subreddit.display_name;
+    if(canRemoveFrom.includes(subreddit)) {
+      await r.getSubmission(flip.reddit_id).remove();
+      console.log(`removed POST:${flip.reddit_id}`);
+    }
   }
   return await db.none("UPDATE flips SET remove_at = NULL WHERE id = $1", [flip.id]);
 }
