@@ -22,7 +22,7 @@ async function doRemovals(){
 }
 
 async function removePost(flip){
-  let post = await getPost(postId);
+  let post = await getPost(flip.reddit_id);
   // double check current state
   if(!post.liked) {
     let subreddit = await r.getSubmission(flip.reddit_id).subreddit.display_name;
