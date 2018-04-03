@@ -22,8 +22,7 @@ async function doRemovals(){
 }
 
 async function removePost(flip){
-  const ContentDAO = initWeb3.contracts.ContentDAO;
-  let post = await ContentDAO.methods.getPost(bases.fromBase36(flip.reddit_id)).call();
+  let post = await getPost(postId);
   // double check current state
   if(!post.liked) {
     let subreddit = await r.getSubmission(flip.reddit_id).subreddit.display_name;
@@ -69,9 +68,21 @@ async function getTx(hash, retry){
   }
 }
 
+async function getPost(postId, retry){
+  retry = retry || 0;
+  try {
+    const ContentDAO = initWeb3.contracts.ContentDAO;
+    return await ContentDAO.methods.getPost(bases.fromBase36(postId)).call();
+  } catch (err) {
+    if(retry > 5) throw err;
+    console.log("retry", ++retry)
+    initWeb3.reset();
+    return await getPost(postId, retry);
+  }
+}
+
 async function sendReply(postId, eventId, replyId, previous){
-  const ContentDAO = initWeb3.contracts.ContentDAO;
-  let post = await ContentDAO.methods.getPost(bases.fromBase36(postId)).call();
+  let post = await getPost(postId);
   // do send
   // console.log(postId, eventId, replyId)
   // let reply = await genReply(postId);
