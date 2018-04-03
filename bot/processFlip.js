@@ -95,7 +95,6 @@ async function sendReply(postId, eventId, replyId, previous){
       console.warn(`403 post:${postId}`)
     } else console.warn(err);
   }
-  id = "TEST"
   if(previous && post.liked) await db.none("UPDATE flips SET remove_at = NULL WHERE reddit_id = $1", [postId]);
   return await db.none("UPDATE flips SET reply_id = $1, remove_at = $2 WHERE event_id = $3", [id, post.liked ? null : moment().add(removalDelayMinutes, 'minutes'), eventId]);
 }
