@@ -17,7 +17,7 @@ doRemovals();
 
 async function doRemovals(){
   let toRemove = await db.any("SELECT * FROM flips WHERE remove_at < $1", [moment()]);
-  await Promise.mapSeries(toRemove);
+  await Promise.mapSeries(toRemove, removePost);
 }
 
 async function removePost(flip){
