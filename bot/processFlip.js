@@ -17,6 +17,7 @@ doRemovals();
 
 async function doRemovals(){
   let toRemove = await db.any("SELECT * FROM flips WHERE remove_at < $1", [moment()]);
+  console.log(`${toRemove.length} to remove`);
   await Promise.mapSeries(toRemove, removePost);
 }
 
@@ -80,7 +81,7 @@ async function sendReply(postId, eventId, replyId, previous){
   let id, comment;
   try {
     let reply = await genReply(post, postId);
-    console.log(reply)
+    // console.log(reply)
     if(post.liked) await r.getSubmission(postId).approve();
 
     if(replyId) {
