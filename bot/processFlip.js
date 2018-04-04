@@ -100,7 +100,7 @@ async function sendReply(postId, eventId, replyId, previous){
       console.log(`edited reply ${replyId} to POST:${postId}`);
     } else {
       comment = await r.getSubmission(postId).reply(reply);
-      // await comment.distinguish();
+      await comment.distinguish();
       console.log(`sent reply ${comment.id} to POST:${postId}`);
     }
     id = replyId || comment.id;
