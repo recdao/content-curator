@@ -61,6 +61,9 @@
     <v-toolbar color="amber" app fixed clipped-left>
       <v-toolbar-side-icon @click.native="drawer = !drawer"></v-toolbar-side-icon>
       <span class="title ml-3 mr-5">RECDAO&nbsp;<span class="text">Curator</span></span>
+      <div style="flex-grow: 1; flex-grow: 1; display: flex; justify-content: flex-end;">
+        <withdraw></withdraw>
+      </div>
     </v-toolbar>
 
     <v-content id="content">
@@ -93,13 +96,15 @@
 
 <script>
 import TxNotify from './TxNotify'
+import Withdraw from './Withdraw'
 import moment from 'moment';
 import { mapState } from 'vuex'
 import { FILTERS as FILTER_OPTIONS } from 'constants.json';
 
 export default {
   components: {
-    TxNotify
+    TxNotify,
+    Withdraw
   },
   data: function (){
     return {
