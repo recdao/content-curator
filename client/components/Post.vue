@@ -116,7 +116,7 @@ export default {
     doWithdraw(){
       this.$store.dispatch("addTransaction", {
         label: `Withdraw ${this.post.id}`,
-        promise: ()=>this.ContentDAO.methods.withdraw(bases.fromBase36(this.post.id)).send({from: this.account, gas: 200000}),
+        promise: ()=>this.ContentDAO.methods.withdraw([bases.fromBase36(this.post.id)]).send({from: this.account, gas: 200000}),
         success: ()=>this.$store.dispatch("syncPost", this.post.id)
       });
     },
