@@ -5,7 +5,7 @@
 <script>
 import moment from 'moment';
 import bases from 'bases';
-import Promsie from 'bluebird';
+import Promise from 'bluebird';
 
 export default {
   props: {
