@@ -183,8 +183,8 @@ const actions = {
   },
   async syncPost ({ commit, state }, id) {
     let {ContentDAO} = state.contracts;
-    let idB10 = bases.fromBase36(id);
-    let p = await ContentDAO.methods.getPost(idB10).call({from: state.account});
+    let idBase10 = bases.fromBase36(id);
+    let p = await ContentDAO.methods.getPost(idBase10).call({from: state.account});
     let stage = parseInt(p.stage);
     if(stage) {
       let post = Object.assign({
