@@ -32,9 +32,9 @@ export default {
       }
       let batch = this.posts.slice(0,5).map(p=>p.id).map(bases.fromBase36);
       this.$store.dispatch("addTransaction", {
-        label: `Withdraw ${this.post.id}`,
+        label: `Withdraw Batch`,
         promise: ()=>this.ContentDAO.methods.withdraw(batch).send({from: this.account, gas: 200000}),
-        success: async ()=>await Promise.mapSeries(batch, async (p)=>this.$store.dispatch("syncPost", this.post.id))
+        success: async ()=>await Promise.mapSeries(batch, async (p)=>this.$store.dispatch("syncPost", p.id))
       });
     }
   }
