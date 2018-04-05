@@ -35,7 +35,7 @@ export default {
       this.$store.dispatch("addTransaction", {
         label: `Withdraw Batch`,
         promise: ()=>this.ContentDAO.methods.withdraw(batch).send({from: this.account, gas: 200000}),
-        success: async ()=>await Promise.mapSeries(batch, async (p)=>this.$store.dispatch("syncPost", p.id))
+        success: async ()=>await Promise.mapSeries(batch, async (p)=>this.$store.dispatch("syncPost", bases.toBase36(p.id)))
       });
     }
   }
