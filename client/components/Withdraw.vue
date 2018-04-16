@@ -29,14 +29,17 @@ export default {
   methods: {
     doWithdraw(){
       if(this.posts.length > 5) {
-        alert("You have more than 5 markets to withdraw from. To optimise on gas this transaction will batch 5 withdrawals together until all have been withdrawn. After each transaction it may help to refresh the page.")
+        alert("You have more than 5 markets to withdraw from. To optimise on gas each transaction will batch 5 withdrawals together until all have been withdrawn.")
       }
-      let batch = this.posts.slice(0,5).map(p=>p.id).map(bases.fromBase36);
-      this.$store.dispatch("addTransaction", {
-        label: `Withdraw Batch`,
-        promise: ()=>this.ContentDAO.methods.withdraw(batch).send({from: this.account, gas: 200000}),
-        success: async ()=>await Promise.mapSeries(batch, async (p)=>this.$store.dispatch("syncPost", bases.toBase36(p.id)))
-      });
+      let posts = this.posts.slice(0);
+      while (posts.length > 0){
+        let batch = posts.splice(0,5).map(p=>p.id).map(bases.fromBase36);
+        this.$store.dispatch("addTransaction", {
+          label: `Withdraw Batch`,
+          promise: ()=>this.ContentDAO.methods.withdraw(batch).send({from: this.account, gas: 200000}),
+          success: async ()=>await Promise.mapSeries(batch, async (p)=>this.$store.dispatch("syncPost", bases.toBase36(p.id)))
+        });
+      }
     }
   }
 }
