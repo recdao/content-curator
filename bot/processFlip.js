@@ -118,9 +118,9 @@ async function sendReply(postId, eventId, replyId, previous){
 async function genReply(post, postId){
   let total = {true: post.totalUp, false: post.totalDown};
   let toFlip = 2*total[post.liked] - total[!post.liked];
-  if(post.liked) return `This post has received a support stake via the r/recdao [content curator](http://curator.recdao.org:3000). Disagree? Stake ${toFlip/Math.pow(10,9)} [REC](https://www.reddit.com/r/recdao/comments/83wdeq/faq/) to trigger removal.`;
+  if(post.liked) return `This post has received a support stake via the r/recdao [content curator](http://curator.recdao.org:3000). If it's spam, please [stake](http://curator.recdao.org:3000) ${toFlip/Math.pow(10,9)} [REC](https://www.reddit.com/r/recdao/comments/83wdeq/faq/) to reverse this position and trigger removal.`;
   let subreddit = await r.getSubmission("88yb6x").subreddit.display_name;
-  if(canRemoveFrom.includes(subreddit)) return `This post has received a rejection stake via the r/recdao [content curator](http://curator.recdao.org:3000) and will be removed in ${removalDelayMinutes/60} hour. Disagree? Stake ${toFlip/Math.pow(10,9)} [REC](https://www.reddit.com/r/recdao/comments/83wdeq/faq/) to support it.` ;
-  return `This post has received a rejection stake via the r/recdao [content curator](http://curator.recdao.org:3000). Disagree? Stake ${toFlip/Math.pow(10,9)} [REC](https://www.reddit.com/r/recdao/comments/83wdeq/faq/) to support it. On ${canRemoveFrom.map(s=>('r/'+s).join(' and '))} this post would be removed in ${removalDelayMinutes/60} hour` ;
+  if(canRemoveFrom.includes(subreddit)) return `Someone has flagged this post as spam. It will be removed in ${removalDelayMinutes/60} hour. [Stake](http://curator.recdao.org:3000) ${toFlip/Math.pow(10,9)} [REC](https://www.reddit.com/r/recdao/comments/83wdeq/faq/) to reverse this position.` ;
+  return `Someone has flagged this post as spam. If it's not please [stake](http://curator.recdao.org:3000) ${toFlip/Math.pow(10,9)} [REC](https://www.reddit.com/r/recdao/comments/83wdeq/faq/) to support it. On ${canRemoveFrom.map(s=>('r/'+s).join(' and '))} this post would be removed in ${removalDelayMinutes/60} hour` ;
 
 }
